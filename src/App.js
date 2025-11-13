@@ -163,15 +163,33 @@ const AppProvider = ({ children }) => {
             id: 1,
             name: 'Faculty of Information & Communication Technology',
             courses: [
-              { id: 1, name: 'BSc in Information Technology', duration: '4 years', requirements: 'LGCSE with Math and English' },
-              { id: 2, name: 'BSc in Software Engineering', duration: '4 years', requirements: 'LGCSE with Math and Physics' }
+              { 
+                id: 1, 
+                name: 'BSc in Information Technology', 
+                duration: '4 years', 
+                requirements: 'LGCSE with Math and English',
+                minGrades: { math: 'C', english: 'C', science: 'D' }
+              },
+              { 
+                id: 2, 
+                name: 'BSc in Software Engineering', 
+                duration: '4 years', 
+                requirements: 'LGCSE with Math and Physics',
+                minGrades: { math: 'B', english: 'C', science: 'C' }
+              }
             ]
           },
           {
             id: 2,
             name: 'Faculty of Business',
             courses: [
-              { id: 3, name: 'BBA in Business Management', duration: '3 years', requirements: 'LGCSE with Math and English' }
+              { 
+                id: 3, 
+                name: 'BBA in Business Management', 
+                duration: '3 years', 
+                requirements: 'LGCSE with Math and English',
+                minGrades: { math: 'D', english: 'C', sesotho: 'D' }
+              }
             ]
           }
         ]
@@ -189,7 +207,13 @@ const AppProvider = ({ children }) => {
             id: 3,
             name: 'Faculty of Science & Technology',
             courses: [
-              { id: 4, name: 'BSc in Computer Science', duration: '4 years', requirements: 'LGCSE with Math and Science' }
+              { 
+                id: 4, 
+                name: 'BSc in Computer Science', 
+                duration: '4 years', 
+                requirements: 'LGCSE with Math and Science',
+                minGrades: { math: 'B', english: 'C', science: 'C' }
+              }
             ]
           }
         ]
@@ -238,33 +262,49 @@ const AppProvider = ({ children }) => {
       }
     ];
 
-    // Sample jobs
+    // Sample jobs for high school graduates
     const sampleJobs = [
       {
         id: 1,
-        title: 'Junior Software Developer',
+        title: 'Customer Service Trainee',
         company: 'Econet Telecom Lesotho',
         companyId: 1,
         location: 'Maseru',
         type: 'Full-time',
-        salary: 'M8,000 - M12,000',
-        description: 'We are looking for a passionate Junior Software Developer to design, develop and install software solutions.',
-        requirements: 'BSc in Computer Science or related field, knowledge of programming languages, problem-solving skills',
+        salary: 'M3,000 - M4,000',
+        description: 'We are looking for enthusiastic high school graduates to join our customer service team as trainees.',
+        requirements: 'LGCSE Certificate, good communication skills, basic computer knowledge',
         postedDate: '2024-01-15',
-        status: 'active'
+        status: 'active',
+        forHighSchool: true
       },
       {
         id: 2,
-        title: 'IT Support Specialist',
+        title: 'Bank Teller Trainee',
         company: 'Standard Bank Lesotho',
         companyId: 2,
         location: 'Maseru',
         type: 'Full-time',
-        salary: 'M6,000 - M9,000',
-        description: 'Provide technical assistance to our staff and customers, troubleshoot hardware and software issues.',
-        requirements: 'Diploma in IT, knowledge of Windows OS, good communication skills',
+        salary: 'M3,500 - M4,500',
+        description: 'Entry-level position for high school graduates interested in banking career.',
+        requirements: 'LGCSE Certificate, numerical skills, customer service orientation',
         postedDate: '2024-01-10',
-        status: 'active'
+        status: 'active',
+        forHighSchool: true
+      },
+      {
+        id: 3,
+        title: 'Retail Assistant',
+        company: 'Pick n Pay',
+        companyId: 3,
+        location: 'Maseru',
+        type: 'Part-time',
+        salary: 'M2,500 - M3,500',
+        description: 'Suitable for high school graduates looking for retail experience.',
+        requirements: 'LGCSE Certificate, friendly personality, willingness to learn',
+        postedDate: '2024-01-12',
+        status: 'active',
+        forHighSchool: true
       }
     ];
 
@@ -313,6 +353,12 @@ const AppProvider = ({ children }) => {
     setSnackbar({ open: true, message, severity });
   };
 
+  const sendVerificationEmail = (email, name) => {
+    // Simulate email verification
+    console.log(`Verification email sent to: ${email}`);
+    showSnackbar(`Verification email sent to ${email}. Please check your inbox.`, 'info');
+  };
+
   const login = (email, password) => {
     // Demo login - in real app, this would be an API call
     const demoUsers = {
@@ -321,7 +367,8 @@ const AppProvider = ({ children }) => {
         name: 'System Administrator', 
         email: 'admin@lesotho.ls', 
         password: 'admin123', 
-        role: 'admin' 
+        role: 'admin',
+        verified: true
       },
       'institution@limkokwing.ls': { 
         id: 2, 
@@ -329,7 +376,8 @@ const AppProvider = ({ children }) => {
         email: 'institution@limkokwing.ls', 
         password: 'inst123', 
         role: 'institution',
-        institutionId: 1
+        institutionId: 1,
+        verified: true
       },
       'company@econet.ls': { 
         id: 3, 
@@ -337,7 +385,8 @@ const AppProvider = ({ children }) => {
         email: 'company@econet.ls', 
         password: 'company123', 
         role: 'company',
-        companyId: 1
+        companyId: 1,
+        verified: true
       },
       'student@test.ls': { 
         id: 4, 
@@ -345,12 +394,17 @@ const AppProvider = ({ children }) => {
         email: 'student@test.ls', 
         password: 'student123', 
         role: 'student',
-        studentId: 1
+        studentId: 1,
+        verified: true
       }
     };
 
     const user = demoUsers[email];
     if (user && user.password === password) {
+      if (!user.verified) {
+        showSnackbar('Please verify your email before logging in.', 'warning');
+        return { success: false, error: 'Email not verified' };
+      }
       setCurrentUser(user);
       localStorage.setItem('currentUser', JSON.stringify(user));
       showSnackbar(`Welcome back, ${user.name}!`, 'success');
@@ -363,7 +417,8 @@ const AppProvider = ({ children }) => {
     const newUser = {
       id: Date.now(),
       ...userData,
-      status: userData.role === 'student' || userData.role === 'admin' ? 'active' : 'pending'
+      status: userData.role === 'student' || userData.role === 'admin' ? 'active' : 'pending',
+      verified: false
     };
 
     if (userData.role === 'student') {
@@ -404,11 +459,18 @@ const AppProvider = ({ children }) => {
       setCompanies(prev => [...prev, newCompany]);
       newUser.companyId = newCompany.id;
     }
-    // For admin role, no additional data needs to be created
 
-    setCurrentUser(newUser);
-    localStorage.setItem('currentUser', JSON.stringify(newUser));
-    showSnackbar('Registration successful!', 'success');
+    // Send verification email
+    sendVerificationEmail(userData.email, userData.name);
+
+    // For demo purposes, auto-verify
+    setTimeout(() => {
+      newUser.verified = true;
+      setCurrentUser(newUser);
+      localStorage.setItem('currentUser', JSON.stringify(newUser));
+    }, 2000);
+
+    showSnackbar('Registration successful! Please check your email for verification.', 'success');
     return { success: true, user: newUser };
   };
 
@@ -456,15 +518,6 @@ const AppProvider = ({ children }) => {
   };
 
   const submitApplication = (applicationData) => {
-    const institutionApplications = applications.filter(app => 
-      app.studentId === applicationData.studentId && app.institutionId === applicationData.institutionId
-    );
-
-    if (institutionApplications.length >= 2) {
-      showSnackbar('You can only apply for maximum 2 courses per institution', 'error');
-      return { success: false };
-    }
-
     const newApplication = {
       id: Date.now(),
       ...applicationData,
@@ -599,7 +652,6 @@ const Navbar = () => {
     <AppBar position="static" sx={{ bgcolor: 'primary.main', boxShadow: 3 }}>
       <Toolbar>
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, cursor: 'pointer' }} onClick={() => navigate('/')}>
-          <School sx={{ mr: 2, fontSize: 32 }} />
           <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
             Lesotho Career Platform
           </Typography>
@@ -656,7 +708,7 @@ const Footer = () => {
         <Grid container spacing={4}>
           <Grid item xs={12} md={4}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              🎓 Lesotho Career Platform
+              Lesotho Career Platform
             </Typography>
             <Typography variant="body2">
               Connecting students with educational institutions and career opportunities across Lesotho.
@@ -716,7 +768,7 @@ const LoginPage = () => {
   return (
     <Box sx={{ 
       minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'white',
       display: 'flex',
       alignItems: 'center',
       py: 4
@@ -824,7 +876,9 @@ const RegisterPage = () => {
     const result = register(formData);
     
     if (result.success) {
-      navigate('/dashboard');
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 3000);
     } else {
       setError(result.error || 'Registration failed');
     }
@@ -834,7 +888,7 @@ const RegisterPage = () => {
   return (
     <Box sx={{ 
       minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'white',
       display: 'flex',
       alignItems: 'center',
       py: 4
@@ -1007,60 +1061,94 @@ const RegisterPage = () => {
 
 // ===== DASHBOARD COMPONENTS =====
 const StudentDashboard = () => {
-  const { currentUser, institutions, applications, jobs, submitApplication, applyForJob, showSnackbar } = useApp();
-  const [selectedInstitution, setSelectedInstitution] = useState('');
+  const { currentUser, institutions, applications, jobs, submitApplication, applyForJob, showSnackbar, students, setStudents } = useApp();
+  const [selectedInstitutions, setSelectedInstitutions] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState('');
   const [activeTab, setActiveTab] = useState(0);
   const [viewJobDialog, setViewJobDialog] = useState(null);
+  const [studentGrades, setStudentGrades] = useState({
+    english: '',
+    math: '',
+    science: '',
+    sesotho: ''
+  });
 
   const studentApplications = applications.filter(app => app.studentId === currentUser?.studentId);
-  const availableJobs = jobs.filter(job => job.status === 'active');
+  const availableJobs = jobs.filter(job => job.status === 'active' && job.forHighSchool);
   const approvedInstitutions = institutions.filter(inst => inst.status === 'approved');
+  const currentStudent = students.find(s => s.id === currentUser?.studentId);
+
+  // Get all available courses across all institutions
+  const allCourses = approvedInstitutions.flatMap(inst => 
+    inst.faculties.flatMap(faculty => 
+      faculty.courses.map(course => ({
+        ...course,
+        institutionName: inst.name,
+        facultyName: faculty.name,
+        institutionId: inst.id
+      }))
+    )
+  );
+
+  // Filter courses based on student's grades
+  const getQualifiedCourses = () => {
+    if (!currentStudent?.qualifications?.lgcse) return allCourses;
+    
+    const grades = currentStudent.qualifications.lgcse;
+    return allCourses.filter(course => {
+      const minGrades = course.minGrades;
+      if (!minGrades) return true;
+
+      // Check if student meets minimum grade requirements
+      for (const subject in minGrades) {
+        const minGrade = minGrades[subject];
+        const studentGrade = grades[subject];
+        
+        if (!studentGrade) return false;
+        
+        // Simple grade comparison (A > B > C > D > E > F)
+        const gradeOrder = { 'A': 6, 'B': 5, 'C': 4, 'D': 3, 'E': 2, 'F': 1 };
+        if (gradeOrder[studentGrade] < gradeOrder[minGrade]) {
+          return false;
+        }
+      }
+      return true;
+    });
+  };
+
+  const qualifiedCourses = getQualifiedCourses();
 
   const handleApplication = () => {
-    if (!selectedInstitution || !selectedCourse) {
-      showSnackbar('Please select both institution and course', 'error');
+    if (selectedInstitutions.length === 0 || !selectedCourse) {
+      showSnackbar('Please select at least one institution and a course', 'error');
       return;
     }
 
-    const institution = institutions.find(inst => inst.id === parseInt(selectedInstitution));
-    if (!institution) {
-      showSnackbar('Selected institution not found', 'error');
-      return;
-    }
-
-    // Find the course across all faculties
-    let selectedCourseData = null;
-    let facultyName = '';
-
-    for (const faculty of institution.faculties) {
-      const course = faculty.courses.find(c => c.id === parseInt(selectedCourse));
-      if (course) {
-        selectedCourseData = course;
-        facultyName = faculty.name;
-        break;
-      }
-    }
-
-    if (!selectedCourseData) {
+    const course = allCourses.find(c => c.id === parseInt(selectedCourse));
+    if (!course) {
       showSnackbar('Selected course not found', 'error');
       return;
     }
 
-    const result = submitApplication({
-      studentId: currentUser.studentId,
-      studentName: currentUser.name,
-      institutionId: institution.id,
-      institutionName: institution.name,
-      courseId: selectedCourseData.id,
-      courseName: selectedCourseData.name,
-      faculty: facultyName
+    // Submit applications to all selected institutions
+    selectedInstitutions.forEach(institutionId => {
+      const institution = institutions.find(inst => inst.id === institutionId);
+      if (institution) {
+        submitApplication({
+          studentId: currentUser.studentId,
+          studentName: currentUser.name,
+          institutionId: institution.id,
+          institutionName: institution.name,
+          courseId: course.id,
+          courseName: course.name,
+          faculty: course.facultyName
+        });
+      }
     });
 
-    if (result.success) {
-      setSelectedInstitution('');
-      setSelectedCourse('');
-    }
+    setSelectedInstitutions([]);
+    setSelectedCourse('');
+    showSnackbar(`Applications submitted to ${selectedInstitutions.length} institution(s)!`, 'success');
   };
 
   const handleJobApplication = (job) => {
@@ -1078,51 +1166,26 @@ const StudentDashboard = () => {
     }
   };
 
-  // Get available courses for selected institution
-  const getAvailableCourses = () => {
-    if (!selectedInstitution) return [];
-    
-    const institution = institutions.find(inst => inst.id === parseInt(selectedInstitution));
-    if (!institution) return [];
-    
-    return institution.faculties.flatMap(faculty => 
-      faculty.courses.map(course => ({
-        ...course,
-        facultyName: faculty.name
-      }))
-    );
-  };
-
-  const statsCards = [
-    { 
-      title: 'My Applications', 
-      value: studentApplications.length, 
-      color: '#2196f3', 
-      icon: <Assignment />,
-      description: 'Total course applications'
-    },
-    { 
-      title: 'Admitted', 
-      value: studentApplications.filter(app => app.status === 'admitted').length, 
-      color: '#4caf50', 
-      icon: <CheckCircle />,
-      description: 'Successful admissions'
-    },
-    { 
-      title: 'Pending', 
-      value: studentApplications.filter(app => app.status === 'pending').length, 
-      color: '#ff9800', 
-      icon: <Warning />,
-      description: 'Applications under review'
-    },
-    { 
-      title: 'Job Matches', 
-      value: availableJobs.length, 
-      color: '#9c27b0', 
-      icon: <Work />,
-      description: 'Available job opportunities'
+  const handleGradeSubmit = () => {
+    if (!studentGrades.english || !studentGrades.math) {
+      showSnackbar('Please enter at least English and Math grades', 'error');
+      return;
     }
-  ];
+
+    setStudents(prev => prev.map(student => 
+      student.id === currentUser.studentId 
+        ? { 
+            ...student, 
+            qualifications: { 
+              ...student.qualifications, 
+              lgcse: studentGrades 
+            } 
+          } 
+        : student
+    ));
+
+    showSnackbar('Grades submitted successfully!', 'success');
+  };
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -1135,42 +1198,13 @@ const StudentDashboard = () => {
         </Typography>
       </Box>
 
-      {/* Statistics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {statsCards.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card 
-              sx={{ 
-                background: `linear-gradient(135deg, ${stat.color} 0%, ${stat.color}99 100%)`,
-                color: 'white',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                '&:hover': { transform: 'translateY(-4px)' }
-              }}
-            >
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    <Typography variant="h3" fontWeight="bold">{stat.value}</Typography>
-                    <Typography variant="h6">{stat.title}</Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9, mt: 1 }}>
-                      {stat.description}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ opacity: 0.9, fontSize: '3rem' }}>{stat.icon}</Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
       <Paper sx={{ mb: 4 }}>
         <Tabs 
           value={activeTab} 
           onChange={(e, newValue) => setActiveTab(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
+          <Tab label="Enter LGCSE Results" />
           <Tab label="Apply for Courses" />
           <Tab label="My Applications" />
           <Tab label="Job Opportunities" />
@@ -1183,37 +1217,155 @@ const StudentDashboard = () => {
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 3, boxShadow: 3 }}>
               <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main', mb: 3 }}>
+                Enter Your LGCSE Results
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Enter your grades to see which courses you qualify for
+              </Typography>
+              
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    select
+                    label="English"
+                    value={studentGrades.english}
+                    onChange={(e) => setStudentGrades({...studentGrades, english: e.target.value})}
+                  >
+                    <MenuItem value="A">A</MenuItem>
+                    <MenuItem value="B">B</MenuItem>
+                    <MenuItem value="C">C</MenuItem>
+                    <MenuItem value="D">D</MenuItem>
+                    <MenuItem value="E">E</MenuItem>
+                    <MenuItem value="F">F</MenuItem>
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    select
+                    label="Mathematics"
+                    value={studentGrades.math}
+                    onChange={(e) => setStudentGrades({...studentGrades, math: e.target.value})}
+                  >
+                    <MenuItem value="A">A</MenuItem>
+                    <MenuItem value="B">B</MenuItem>
+                    <MenuItem value="C">C</MenuItem>
+                    <MenuItem value="D">D</MenuItem>
+                    <MenuItem value="E">E</MenuItem>
+                    <MenuItem value="F">F</MenuItem>
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    select
+                    label="Science"
+                    value={studentGrades.science}
+                    onChange={(e) => setStudentGrades({...studentGrades, science: e.target.value})}
+                  >
+                    <MenuItem value="A">A</MenuItem>
+                    <MenuItem value="B">B</MenuItem>
+                    <MenuItem value="C">C</MenuItem>
+                    <MenuItem value="D">D</MenuItem>
+                    <MenuItem value="E">E</MenuItem>
+                    <MenuItem value="F">F</MenuItem>
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    select
+                    label="Sesotho"
+                    value={studentGrades.sesotho}
+                    onChange={(e) => setStudentGrades({...studentGrades, sesotho: e.target.value})}
+                  >
+                    <MenuItem value="A">A</MenuItem>
+                    <MenuItem value="B">B</MenuItem>
+                    <MenuItem value="C">C</MenuItem>
+                    <MenuItem value="D">D</MenuItem>
+                    <MenuItem value="E">E</MenuItem>
+                    <MenuItem value="F">F</MenuItem>
+                  </TextField>
+                </Grid>
+              </Grid>
+
+              <Button
+                variant="contained"
+                onClick={handleGradeSubmit}
+                sx={{ mt: 3 }}
+                disabled={!studentGrades.english || !studentGrades.math}
+              >
+                Submit Grades
+              </Button>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Card sx={{ p: 3, boxShadow: 3 }}>
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                Qualified Courses
+              </Typography>
+              {qualifiedCourses.length > 0 ? (
+                <List>
+                  {qualifiedCourses.slice(0, 5).map(course => (
+                    <ListItem key={course.id}>
+                      <ListItemText
+                        primary={course.name}
+                        secondary={`${course.institutionName} - ${course.facultyName}`}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  Enter your grades to see qualified courses
+                </Typography>
+              )}
+            </Card>
+          </Grid>
+        </Grid>
+      )}
+
+      {activeTab === 1 && (
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Card sx={{ p: 3, boxShadow: 3 }}>
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main', mb: 3 }}>
                 Apply for Courses
               </Typography>
+              
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <FormControl fullWidth>
-                  <InputLabel>Select Institution</InputLabel>
+                  <InputLabel>Select Institutions (Multiple)</InputLabel>
                   <Select
-                    value={selectedInstitution}
-                    onChange={(e) => {
-                      setSelectedInstitution(e.target.value);
-                      setSelectedCourse('');
-                    }}
-                    label="Select Institution"
+                    multiple
+                    value={selectedInstitutions}
+                    onChange={(e) => setSelectedInstitutions(e.target.value)}
+                    label="Select Institutions (Multiple)"
+                    renderValue={(selected) => selected.map(id => 
+                      institutions.find(inst => inst.id === id)?.name
+                    ).join(', ')}
                   >
                     {approvedInstitutions.map(inst => (
                       <MenuItem key={inst.id} value={inst.id}>
-                        {inst.name} - {inst.location}
+                        <Checkbox checked={selectedInstitutions.indexOf(inst.id) > -1} />
+                        <ListItemText primary={`${inst.name} - ${inst.location}`} />
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
 
-                <FormControl fullWidth disabled={!selectedInstitution}>
+                <FormControl fullWidth>
                   <InputLabel>Select Course</InputLabel>
                   <Select
                     value={selectedCourse}
                     onChange={(e) => setSelectedCourse(e.target.value)}
                     label="Select Course"
                   >
-                    {getAvailableCourses().map(course => (
+                    {qualifiedCourses.map(course => (
                       <MenuItem key={course.id} value={course.id}>
-                        {course.name} - {course.facultyName} ({course.duration})
+                        {course.name} - {course.institutionName} ({course.duration})
                       </MenuItem>
                     ))}
                   </Select>
@@ -1223,7 +1375,7 @@ const StudentDashboard = () => {
                   <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
                     <Typography variant="body2" color="text.secondary">
                       <strong>Requirements:</strong>{' '}
-                      {getAvailableCourses().find(c => c.id === parseInt(selectedCourse))?.requirements}
+                      {qualifiedCourses.find(c => c.id === parseInt(selectedCourse))?.requirements}
                     </Typography>
                   </Box>
                 )}
@@ -1232,11 +1384,11 @@ const StudentDashboard = () => {
                   variant="contained"
                   size="large"
                   onClick={handleApplication}
-                  disabled={!selectedInstitution || !selectedCourse}
+                  disabled={selectedInstitutions.length === 0 || !selectedCourse}
                   startIcon={<Add />}
                   sx={{ mt: 2 }}
                 >
-                  Submit Application
+                  Submit Applications ({selectedInstitutions.length} institutions)
                 </Button>
               </Box>
             </Card>
@@ -1245,27 +1397,27 @@ const StudentDashboard = () => {
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 3, boxShadow: 3 }}>
               <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main', mb: 3 }}>
-                Available Institutions
+                Available Courses
               </Typography>
               <List>
-                {approvedInstitutions.map(inst => (
-                  <ListItem key={inst.id} sx={{ borderBottom: '1px solid', borderColor: 'divider', py: 2 }}>
+                {qualifiedCourses.map(course => (
+                  <ListItem key={course.id} sx={{ borderBottom: '1px solid', borderColor: 'divider', py: 2 }}>
                     <ListItemIcon>
-                      <Business color="primary" />
+                      <Book color="primary" />
                     </ListItemIcon>
                     <ListItemText
                       primary={
                         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                          {inst.name}
+                          {course.name}
                         </Typography>
                       }
                       secondary={
                         <Box>
                           <Typography variant="body2" color="text.secondary">
-                            {inst.type} • {inst.location}
+                            {course.institutionName} • {course.facultyName}
                           </Typography>
                           <Typography variant="body2" color="primary">
-                            {inst.faculties.flatMap(f => f.courses).length} courses available
+                            Duration: {course.duration}
                           </Typography>
                         </Box>
                       }
@@ -1278,7 +1430,7 @@ const StudentDashboard = () => {
         </Grid>
       )}
 
-      {activeTab === 1 && (
+      {activeTab === 2 && (
         <Card sx={{ boxShadow: 3 }}>
           <CardHeader
             title="My Applications"
@@ -1335,10 +1487,10 @@ const StudentDashboard = () => {
         </Card>
       )}
 
-      {activeTab === 2 && (
+      {activeTab === 3 && (
         <Box>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main', mb: 3 }}>
-            Available Job Opportunities
+            Job Opportunities for High School Graduates
           </Typography>
           <Grid container spacing={3}>
             {availableJobs.map((job) => (
@@ -1360,6 +1512,7 @@ const StudentDashboard = () => {
                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
                       <Chip label={job.type} color="primary" size="small" />
                       <Chip label={job.salary} variant="outlined" size="small" />
+                      <Chip label="High School" color="secondary" size="small" />
                     </Box>
                     <Typography variant="caption" color="text.secondary">
                       Posted: {job.postedDate}
@@ -1397,7 +1550,7 @@ const StudentDashboard = () => {
         </Box>
       )}
 
-      {activeTab === 3 && (
+      {activeTab === 4 && (
         <Card sx={{ p: 4, boxShadow: 3 }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main', mb: 3 }}>
             My Profile
@@ -1414,13 +1567,19 @@ const StudentDashboard = () => {
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>Application Statistics</Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Typography><strong>Total Applications:</strong> {studentApplications.length}</Typography>
-                <Typography><strong>Admitted:</strong> {studentApplications.filter(app => app.status === 'admitted').length}</Typography>
-                <Typography><strong>Pending:</strong> {studentApplications.filter(app => app.status === 'pending').length}</Typography>
-                <Typography><strong>Rejected:</strong> {studentApplications.filter(app => app.status === 'rejected').length}</Typography>
-              </Box>
+              <Typography variant="h6" gutterBottom>LGCSE Results</Typography>
+              {currentStudent?.qualifications?.lgcse ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Typography><strong>English:</strong> {currentStudent.qualifications.lgcse.english}</Typography>
+                  <Typography><strong>Mathematics:</strong> {currentStudent.qualifications.lgcse.math}</Typography>
+                  <Typography><strong>Science:</strong> {currentStudent.qualifications.lgcse.science || 'Not provided'}</Typography>
+                  <Typography><strong>Sesotho:</strong> {currentStudent.qualifications.lgcse.sesotho || 'Not provided'}</Typography>
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No grades entered yet.
+                </Typography>
+              )}
             </Grid>
           </Grid>
         </Card>
@@ -1488,7 +1647,7 @@ const InstitutionDashboard = () => {
   const { currentUser, institutions, applications, addFaculty, addCourse, updateApplicationStatus, deleteCourse } = useApp();
   const [activeTab, setActiveTab] = useState(0);
   const [newFaculty, setNewFaculty] = useState({ name: '', description: '' });
-  const [newCourse, setNewCourse] = useState({ name: '', duration: '', requirements: '' });
+  const [newCourse, setNewCourse] = useState({ name: '', duration: '', requirements: '', minGrades: { math: '', english: '', science: '', sesotho: '' } });
   const [selectedFaculty, setSelectedFaculty] = useState('');
   const [manageCoursesDialog, setManageCoursesDialog] = useState(false);
 
@@ -1505,7 +1664,7 @@ const InstitutionDashboard = () => {
   const handleAddCourse = () => {
     if (newCourse.name && selectedFaculty) {
       addCourse(institution.id, parseInt(selectedFaculty), newCourse);
-      setNewCourse({ name: '', duration: '', requirements: '' });
+      setNewCourse({ name: '', duration: '', requirements: '', minGrades: { math: '', english: '', science: '', sesotho: '' } });
       setSelectedFaculty('');
     }
   };
@@ -1515,33 +1674,6 @@ const InstitutionDashboard = () => {
       deleteCourse(institution.id, facultyId, courseId);
     }
   };
-
-  const statsCards = [
-    { 
-      title: 'Total Applications', 
-      value: institutionApplications.length, 
-      color: '#2196f3', 
-      icon: <Assignment /> 
-    },
-    { 
-      title: 'Courses Offered', 
-      value: institution?.faculties.flatMap(f => f.courses).length || 0, 
-      color: '#4caf50', 
-      icon: <School /> 
-    },
-    { 
-      title: 'Students Admitted', 
-      value: institutionApplications.filter(app => app.status === 'admitted').length, 
-      color: '#ff9800', 
-      icon: <CheckCircle /> 
-    },
-    { 
-      title: 'Pending Review', 
-      value: institutionApplications.filter(app => app.status === 'pending').length, 
-      color: '#9c27b0', 
-      icon: <Warning /> 
-    }
-  ];
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -1554,43 +1686,16 @@ const InstitutionDashboard = () => {
         </Typography>
       </Box>
 
-      {/* Statistics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {statsCards.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card 
-              sx={{ 
-                background: `linear-gradient(135deg, ${stat.color} 0%, ${stat.color}99 100%)`,
-                color: 'white',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                '&:hover': { transform: 'translateY(-4px)' }
-              }}
-            >
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    <Typography variant="h3" fontWeight="bold">{stat.value}</Typography>
-                    <Typography variant="h6">{stat.title}</Typography>
-                  </Box>
-                  <Box sx={{ opacity: 0.9, fontSize: '3rem' }}>{stat.icon}</Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
       <Paper sx={{ mb: 4 }}>
         <Tabs 
           value={activeTab} 
           onChange={(e, newValue) => setActiveTab(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          <Tab label="Overview" />
-          <Tab label="Manage Courses" />
+          <Tab label="Recent Applications" />
           <Tab label="Student Applications" />
           <Tab label="Admissions" />
+          <Tab label="Manage Courses" />
         </Tabs>
       </Paper>
 
@@ -1609,10 +1714,11 @@ const InstitutionDashboard = () => {
                       <TableCell>Course</TableCell>
                       <TableCell>Applied Date</TableCell>
                       <TableCell>Status</TableCell>
+                      <TableCell>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {institutionApplications.slice(0, 5).map((app) => (
+                    {institutionApplications.slice(0, 10).map((app) => (
                       <TableRow key={app.id} hover>
                         <TableCell>
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -1633,11 +1739,33 @@ const InstitutionDashboard = () => {
                             }
                           />
                         </TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Tooltip title="Admit Student">
+                              <IconButton 
+                                color="success" 
+                                onClick={() => updateApplicationStatus(app.id, 'admitted')}
+                                disabled={app.status === 'admitted'}
+                              >
+                                <CheckCircle />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Reject Application">
+                              <IconButton 
+                                color="error" 
+                                onClick={() => updateApplicationStatus(app.id, 'rejected')}
+                                disabled={app.status === 'rejected'}
+                              >
+                                <Delete />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </TableCell>
                       </TableRow>
                     ))}
                     {institutionApplications.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
+                        <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
                           <Typography variant="body1" color="text.secondary">
                             No applications received yet.
                           </Typography>
@@ -1658,16 +1786,16 @@ const InstitutionDashboard = () => {
                 <Button 
                   variant="contained" 
                   startIcon={<Add />}
-                  onClick={() => setActiveTab(1)}
+                  onClick={() => setActiveTab(3)}
                 >
                   Add New Course
                 </Button>
                 <Button 
                   variant="outlined" 
                   startIcon={<Assignment />}
-                  onClick={() => setActiveTab(2)}
+                  onClick={() => setActiveTab(1)}
                 >
-                  Review Applications
+                  View All Applications
                 </Button>
                 <Button 
                   variant="outlined" 
@@ -1683,88 +1811,10 @@ const InstitutionDashboard = () => {
       )}
 
       {activeTab === 1 && (
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
-            <Card sx={{ p: 3, boxShadow: 3 }}>
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-                Add New Faculty
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <TextField
-                  label="Faculty Name"
-                  value={newFaculty.name}
-                  onChange={(e) => setNewFaculty({...newFaculty, name: e.target.value})}
-                  fullWidth
-                />
-                <TextField
-                  label="Description"
-                  multiline
-                  rows={3}
-                  value={newFaculty.description}
-                  onChange={(e) => setNewFaculty({...newFaculty, description: e.target.value})}
-                  fullWidth
-                />
-                <Button variant="contained" onClick={handleAddFaculty} startIcon={<Add />}>
-                  Add Faculty
-                </Button>
-              </Box>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Card sx={{ p: 3, boxShadow: 3 }}>
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-                Add New Course
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <FormControl fullWidth>
-                  <InputLabel>Select Faculty</InputLabel>
-                  <Select
-                    value={selectedFaculty}
-                    onChange={(e) => setSelectedFaculty(e.target.value)}
-                    label="Select Faculty"
-                  >
-                    {institution?.faculties.map(faculty => (
-                      <MenuItem key={faculty.id} value={faculty.id}>
-                        {faculty.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <TextField
-                  label="Course Name"
-                  value={newCourse.name}
-                  onChange={(e) => setNewCourse({...newCourse, name: e.target.value})}
-                  fullWidth
-                />
-                <TextField
-                  label="Duration"
-                  value={newCourse.duration}
-                  onChange={(e) => setNewCourse({...newCourse, duration: e.target.value})}
-                  fullWidth
-                />
-                <TextField
-                  label="Requirements"
-                  multiline
-                  rows={3}
-                  value={newCourse.requirements}
-                  onChange={(e) => setNewCourse({...newCourse, requirements: e.target.value})}
-                  fullWidth
-                />
-                <Button variant="contained" onClick={handleAddCourse} startIcon={<Add />}>
-                  Add Course
-                </Button>
-              </Box>
-            </Card>
-          </Grid>
-        </Grid>
-      )}
-
-      {activeTab === 2 && (
         <Card sx={{ boxShadow: 3 }}>
           <CardHeader
             title="Student Applications"
-            subheader="Review and manage student applications"
+            subheader="Review and manage all student applications"
           />
           <Divider />
           <TableContainer>
@@ -1842,6 +1892,173 @@ const InstitutionDashboard = () => {
             </Table>
           </TableContainer>
         </Card>
+      )}
+
+      {activeTab === 2 && (
+        <Card sx={{ boxShadow: 3 }}>
+          <CardHeader
+            title="Admissions"
+            subheader="Students admitted to your institution"
+          />
+          <Divider />
+          <TableContainer>
+            <Table>
+              <TableHead sx={{ bgcolor: 'primary.main' }}>
+                <TableRow>
+                  <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Student</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Course</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Faculty</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Applied Date</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {institutionApplications.filter(app => app.status === 'admitted').map((app) => (
+                  <TableRow key={app.id} hover>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Avatar sx={{ width: 32, height: 32, mr: 2, bgcolor: 'primary.main' }}>
+                          {app.studentName.split(' ').map(n => n[0]).join('')}
+                        </Avatar>
+                        <Box>
+                          <Typography fontWeight="bold">{app.studentName}</Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell>{app.courseName}</TableCell>
+                    <TableCell>{app.faculty}</TableCell>
+                    <TableCell>{app.appliedDate}</TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={app.status} 
+                        color="success"
+                        sx={{ fontWeight: 'bold' }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {institutionApplications.filter(app => app.status === 'admitted').length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                      <Typography variant="body1" color="text.secondary">
+                        No admissions yet.
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
+      )}
+
+      {activeTab === 3 && (
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Card sx={{ p: 3, boxShadow: 3 }}>
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Add New Faculty
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  label="Faculty Name"
+                  value={newFaculty.name}
+                  onChange={(e) => setNewFaculty({...newFaculty, name: e.target.value})}
+                  fullWidth
+                />
+                <TextField
+                  label="Description"
+                  multiline
+                  rows={3}
+                  value={newFaculty.description}
+                  onChange={(e) => setNewFaculty({...newFaculty, description: e.target.value})}
+                  fullWidth
+                />
+                <Button variant="contained" onClick={handleAddFaculty} startIcon={<Add />}>
+                  Add Faculty
+                </Button>
+              </Box>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Card sx={{ p: 3, boxShadow: 3 }}>
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Add New Course
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Select Faculty</InputLabel>
+                  <Select
+                    value={selectedFaculty}
+                    onChange={(e) => setSelectedFaculty(e.target.value)}
+                    label="Select Faculty"
+                  >
+                    {institution?.faculties.map(faculty => (
+                      <MenuItem key={faculty.id} value={faculty.id}>
+                        {faculty.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <TextField
+                  label="Course Name"
+                  value={newCourse.name}
+                  onChange={(e) => setNewCourse({...newCourse, name: e.target.value})}
+                  fullWidth
+                />
+                <TextField
+                  label="Duration"
+                  value={newCourse.duration}
+                  onChange={(e) => setNewCourse({...newCourse, duration: e.target.value})}
+                  fullWidth
+                />
+                <TextField
+                  label="Requirements"
+                  multiline
+                  rows={3}
+                  value={newCourse.requirements}
+                  onChange={(e) => setNewCourse({...newCourse, requirements: e.target.value})}
+                  fullWidth
+                />
+                <Typography variant="subtitle1" sx={{ mt: 2 }}>Minimum Grade Requirements</Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      select
+                      label="Math"
+                      value={newCourse.minGrades.math}
+                      onChange={(e) => setNewCourse({...newCourse, minGrades: {...newCourse.minGrades, math: e.target.value}})}
+                    >
+                      <MenuItem value="A">A</MenuItem>
+                      <MenuItem value="B">B</MenuItem>
+                      <MenuItem value="C">C</MenuItem>
+                      <MenuItem value="D">D</MenuItem>
+                    </TextField>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      select
+                      label="English"
+                      value={newCourse.minGrades.english}
+                      onChange={(e) => setNewCourse({...newCourse, minGrades: {...newCourse.minGrades, english: e.target.value}})}
+                    >
+                      <MenuItem value="A">A</MenuItem>
+                      <MenuItem value="B">B</MenuItem>
+                      <MenuItem value="C">C</MenuItem>
+                      <MenuItem value="D">D</MenuItem>
+                    </TextField>
+                  </Grid>
+                </Grid>
+                <Button variant="contained" onClick={handleAddCourse} startIcon={<Add />}>
+                  Add Course
+                </Button>
+              </Box>
+            </Card>
+          </Grid>
+        </Grid>
       )}
 
       {/* Manage Courses Dialog */}
@@ -1924,7 +2141,8 @@ const CompanyDashboard = () => {
     requirements: '',
     location: '',
     type: 'Full-time',
-    salary: ''
+    salary: '',
+    forHighSchool: true
   });
 
   const company = companies.find(comp => comp.id === currentUser?.companyId);
@@ -1946,37 +2164,11 @@ const CompanyDashboard = () => {
         requirements: '',
         location: '',
         type: 'Full-time',
-        salary: ''
+        salary: '',
+        forHighSchool: true
       });
     }
   };
-
-  const statsCards = [
-    { 
-      title: 'Active Jobs', 
-      value: companyJobs.length, 
-      color: '#2196f3', 
-      icon: <Work /> 
-    },
-    { 
-      title: 'Total Applicants', 
-      value: companyJobApplications.length, 
-      color: '#4caf50', 
-      icon: <People /> 
-    },
-    { 
-      title: 'Interviews', 
-      value: companyJobApplications.filter(app => app.status === 'interview').length, 
-      color: '#ff9800', 
-      icon: <DateRange /> 
-    },
-    { 
-      title: 'Hired', 
-      value: companyJobApplications.filter(app => app.status === 'hired').length, 
-      color: '#9c27b0', 
-      icon: <CheckCircle /> 
-    }
-  ];
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -1989,40 +2181,13 @@ const CompanyDashboard = () => {
         </Typography>
       </Box>
 
-      {/* Statistics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {statsCards.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card 
-              sx={{ 
-                background: `linear-gradient(135deg, ${stat.color} 0%, ${stat.color}99 100%)`,
-                color: 'white',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                '&:hover': { transform: 'translateY(-4px)' }
-              }}
-            >
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    <Typography variant="h3" fontWeight="bold">{stat.value}</Typography>
-                    <Typography variant="h6">{stat.title}</Typography>
-                  </Box>
-                  <Box sx={{ opacity: 0.9, fontSize: '3rem' }}>{stat.icon}</Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
       <Paper sx={{ mb: 4 }}>
         <Tabs 
           value={activeTab} 
           onChange={(e, newValue) => setActiveTab(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          <Tab label="Overview" />
+          <Tab label="Recent Applications" />
           <Tab label="Post Job" />
           <Tab label="Manage Jobs" />
           <Tab label="Applicants" />
@@ -2044,10 +2209,11 @@ const CompanyDashboard = () => {
                       <TableCell>Job Title</TableCell>
                       <TableCell>Applied Date</TableCell>
                       <TableCell>Status</TableCell>
+                      <TableCell>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {companyJobApplications.slice(0, 5).map((app) => (
+                    {companyJobApplications.slice(0, 10).map((app) => (
                       <TableRow key={app.id} hover>
                         <TableCell>
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -2068,11 +2234,42 @@ const CompanyDashboard = () => {
                             }
                           />
                         </TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Tooltip title="Schedule Interview">
+                              <IconButton 
+                                color="warning"
+                                onClick={() => {
+                                  // In a real app, this would update the application status
+                                  showSnackbar('Interview scheduled for ' + app.studentName);
+                                }}
+                              >
+                                <DateRange />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Hire Candidate">
+                              <IconButton 
+                                color="success"
+                                onClick={() => {
+                                  // In a real app, this would update the application status
+                                  showSnackbar(app.studentName + ' has been hired!');
+                                }}
+                              >
+                                <CheckCircle />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="View Profile">
+                              <IconButton color="primary">
+                                <Visibility />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </TableCell>
                       </TableRow>
                     ))}
                     {companyJobApplications.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
+                        <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
                           <Typography variant="body1" color="text.secondary">
                             No job applications received yet.
                           </Typography>
@@ -2109,7 +2306,7 @@ const CompanyDashboard = () => {
                   startIcon={<People />}
                   onClick={() => setActiveTab(3)}
                 >
-                  View Applicants
+                  View All Applicants
                 </Button>
               </Box>
             </Card>
@@ -2188,6 +2385,17 @@ const CompanyDashboard = () => {
               />
             </Grid>
             <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={newJob.forHighSchool}
+                    onChange={(e) => setNewJob({...newJob, forHighSchool: e.target.checked})}
+                  />
+                }
+                label="This job is suitable for high school graduates"
+              />
+            </Grid>
+            <Grid item xs={12}>
               <Button
                 variant="contained"
                 size="large"
@@ -2227,6 +2435,7 @@ const CompanyDashboard = () => {
                   <TableRow key={job.id} hover>
                     <TableCell>
                       <Typography fontWeight="bold">{job.title}</Typography>
+                      {job.forHighSchool && <Chip label="High School" color="secondary" size="small" sx={{ ml: 1 }} />}
                     </TableCell>
                     <TableCell>
                       <Chip label={job.type} color="primary" size="small" />
@@ -2409,33 +2618,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const statsCards = [
-    { 
-      title: 'Total Institutions', 
-      value: institutions.length, 
-      color: '#2196f3', 
-      icon: <Business /> 
-    },
-    { 
-      title: 'Total Companies', 
-      value: companies.length, 
-      color: '#4caf50', 
-      icon: <BusinessCenter /> 
-    },
-    { 
-      title: 'Total Students', 
-      value: students.length, 
-      color: '#ff9800', 
-      icon: <People /> 
-    },
-    { 
-      title: 'Total Applications', 
-      value: applications.length, 
-      color: '#9c27b0', 
-      icon: <Assignment /> 
-    }
-  ];
-
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box sx={{ mb: 4 }}>
@@ -2446,33 +2628,6 @@ const AdminDashboard = () => {
           System administration and management
         </Typography>
       </Box>
-
-      {/* Statistics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {statsCards.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card 
-              sx={{ 
-                background: `linear-gradient(135deg, ${stat.color} 0%, ${stat.color}99 100%)`,
-                color: 'white',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                '&:hover': { transform: 'translateY(-4px)' }
-              }}
-            >
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    <Typography variant="h3" fontWeight="bold">{stat.value}</Typography>
-                    <Typography variant="h6">{stat.title}</Typography>
-                  </Box>
-                  <Box sx={{ opacity: 0.9, fontSize: '3rem' }}>{stat.icon}</Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
 
       <Paper sx={{ mb: 4 }}>
         <Tabs 
@@ -2732,7 +2887,7 @@ const AdminDashboard = () => {
                 <Typography><strong>Active Institutions:</strong> {approvedInstitutions.length}</Typography>
                 <Typography><strong>Active Companies:</strong> {approvedCompanies.length}</Typography>
                 <Typography><strong>Total Course Applications:</strong> {applications.length}</Typography>
-                <Typography><strong>Total Job Applications:</strong> {0}</Typography>
+                <Typography><strong>Total Job Applications:</strong> {jobApplications.length}</Typography>
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
